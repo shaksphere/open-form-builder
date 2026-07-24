@@ -156,7 +156,9 @@ class OFB_Schema {
 			}
 			// Optional per-option price feeds the "priced options" pricing model.
 			$price = isset( $opt['price'] ) && is_numeric( $opt['price'] ) ? round( (float) $opt['price'], 2 ) : 0.0;
-			$out[] = [ 'label' => $label, 'value' => ( '' !== $value ? $value : $label ), 'price' => $price ];
+			// Optional per-option image for the card layout (course/service pickers).
+			$image = esc_url_raw( (string) ( $opt['image'] ?? '' ) );
+			$out[] = [ 'label' => $label, 'value' => ( '' !== $value ? $value : $label ), 'price' => $price, 'image' => $image ];
 		}
 		return $out;
 	}
@@ -168,6 +170,12 @@ class OFB_Schema {
 			// unit_price multiplies the entered number into the "priced options" total.
 			$unit = isset( $config['unit_price'] ) && is_numeric( $config['unit_price'] ) ? round( (float) $config['unit_price'], 2 ) : 0.0;
 			return [ 'unit_price' => $unit ];
+		}
+		if ( in_array( $type, [ 'radio', 'checkbox' ], true ) ) {
+			// Display as a grid of image cards instead of a plain choice list —
+			// used for course/service pickers.
+			$layout = ( ( $config['layout'] ?? 'list' ) === 'cards' ) ? 'cards' : 'list';
+			return [ 'layout' => $layout ];
 		}
 		if ( 'session_picker' === $type ) {
 			$min = isset( $config['min'] ) ? max( 0, (int) $config['min'] ) : 4;

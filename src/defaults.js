@@ -52,7 +52,10 @@ export function newField( type = 'text' ) {
 		conditional: { enabled: false, action: 'show', match: 'all', rules: [] },
 	};
 	if ( CHOICE_TYPES.includes( type ) ) {
-		field.options = [ { label: 'Option 1', value: 'option-1', price: 0 } ];
+		field.options = [ { label: 'Option 1', value: 'option-1', price: 0, image: '' } ];
+	}
+	if ( type === 'radio' || type === 'checkbox' ) {
+		field.config = { layout: 'list' };
 	}
 	if ( type === 'number' ) {
 		field.config = { unit_price: 0 };
@@ -128,5 +131,10 @@ export function defaultSettings() {
 		redirects: { thank_you_url: '' },
 		messages: { success: 'Thank you. Your submission was received.' },
 		custom_js: '',
+		theme: defaultTheme(),
 	};
+}
+
+export function defaultTheme() {
+	return { primary: '#2563eb', text: '#111827', background: '#ffffff', radius: 10 };
 }

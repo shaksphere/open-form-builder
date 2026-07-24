@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       Open Form Builder
  * Plugin URI:        https://example.com/open-form-builder
- * Description:       A CF7-style form builder with multi-step wizards, conditional logic, a capacity-aware session picker, two pricing models (sessions or priced options/quantities), Stripe Checkout, date/time fields, conditional emails, Mailchimp/MailerLite sync, Google Sheet export and CF7 import. Forms are declarative JSON schemas.
- * Version:           0.3.0
+ * Description:       A CF7-style form builder with 5 starter templates, multi-step wizards, conditional logic, image-card choice fields, a capacity-aware session picker, two pricing models (sessions or priced options/quantities), per-form branding, Stripe Checkout, date/time fields, conditional emails, Mailchimp/MailerLite sync, Google Sheet export and CF7 import. Forms are declarative JSON schemas.
+ * Version:           0.4.0
  * Requires at least: 6.2
  * Requires PHP:      8.0
  * Author:            Open Form Builder
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OFB_VERSION', '0.3.0' );
+define( 'OFB_VERSION', '0.4.0' );
 define( 'OFB_FILE', __FILE__ );
 define( 'OFB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'OFB_URL', plugin_dir_url( __FILE__ ) );

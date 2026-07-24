@@ -9,10 +9,29 @@ import {
 } from '@wordpress/components';
 import { CHOICE_TYPES, OPERATORS, uid } from '../defaults';
 
+/** Opens the WP media modal; calls onSelect(url) with the chosen image's URL. */
+function openMediaPicker( onSelect ) {
+	if ( ! window.wp || ! window.wp.media ) {
+		return;
+	}
+	const frame = window.wp.media( {
+		title: __( 'Select an image', 'open-form-builder' ),
+		multiple: false,
+		library: { type: 'image' },
+	} );
+	frame.on( 'select', () => {
+		const attachment = frame.state().get( 'selection' ).first().toJSON();
+		onSelect( attachment.url );
+	} );
+	frame.open();
+}
+
 export default function FieldEditor( { field, allFields, onChange, onRemove } ) {
 	function set( partial ) { onChange( { ...field, ...partial } ); }
 
 	const isChoice = CHOICE_TYPES.includes( field.type );
+	const canCardLayout = field.type === 'radio' || field.type === 'checkbox';
+	const layout = ( field.config && field.config.layout ) || 'list';
 
 	return (
 		<Card className="ofb-field-editor">
@@ -69,7 +88,15 @@ export default function FieldEditor( { field, allFields, onChange, onRemove } ) 
 					/>
 				) }
 
-				{ isChoice && <OptionsEditor field={ field } set={ set } /> }
+				{ canCardLayout && (
+					<ToggleControl
+						label={ __( 'Show as image cards (instead of a plain list)', 'open-form-builder' ) }
+						help={ __( 'Great for courses, services or products — each option can carry an image and price.', 'open-form-builder' ) }
+						checked={ layout === 'cards' }
+						onChange={ ( on ) => set( { config: { ...( field.config || {} ), layout: on ? 'cards' : 'list' } } ) }
+					/>
+				) }
+				{ isChoice && <OptionsEditor field={ field } set={ set } showImage={ canCardLayout && layout === 'cards' } /> }
 				{ field.type === 'number' && <NumberConfig field={ field } set={ set } /> }
 				{ field.type === 'session_picker' && <SessionConfig field={ field } set={ set } /> }
 
@@ -79,7 +106,7 @@ export default function FieldEditor( { field, allFields, onChange, onRemove } ) 
 	);
 }
 
-function OptionsEditor( { field, set } ) {
+function OptionsEditor( { field, set, showImage } ) {
 	const options = field.options || [];
 	function update( i, partial ) {
 		set( { options: options.map( ( o, j ) => ( j === i ? { ...o, ...partial } : o ) ) } );
@@ -88,25 +115,50 @@ function OptionsEditor( { field, set } ) {
 		<div className="ofb-options">
 			<p className="ofb-subhead">{ __( 'Options', 'open-form-builder' ) }</p>
 			{ options.map( ( opt, i ) => (
-				<Flex key={ i } className="ofb-options__row">
-					<FlexItem isBlock>
-						<TextControl placeholder={ __( 'Label', 'open-form-builder' ) } value={ opt.label } onChange={ ( label ) => update( i, { label } ) } __nextHasNoMarginBottom />
-					</FlexItem>
-					<FlexItem isBlock>
-						<TextControl placeholder={ __( 'Value', 'open-form-builder' ) } value={ opt.value } onChange={ ( value ) => update( i, { value } ) } __nextHasNoMarginBottom />
-					</FlexItem>
-					<FlexItem>
-						<NumberControl placeholder={ __( 'Price', 'open-form-builder' ) } value={ opt.price == null ? 0 : opt.price } min={ 0 } onChange={ ( v ) => update( i, { price: Number( v ) || 0 } ) } __nextHasNoMarginBottom />
-					</FlexItem>
-					<FlexItem>
-						<Button isDestructive variant="tertiary" onClick={ () => set( { options: options.filter( ( _, j ) => j !== i ) } ) }>×</Button>
-					</FlexItem>
-				</Flex>
+				<div key={ i } className="ofb-option-card">
+					{ showImage && <ImagePicker url={ opt.image } onChange={ ( image ) => update( i, { image } ) } /> }
+					<div className="ofb-option-card__fields">
+						<Flex align="flex-start" gap={ 2 }>
+							<FlexItem isBlock>
+								<TextControl placeholder={ __( 'Label', 'open-form-builder' ) } value={ opt.label } onChange={ ( label ) => update( i, { label } ) } __nextHasNoMarginBottom />
+							</FlexItem>
+							<FlexItem>
+								<Button isDestructive variant="tertiary" onClick={ () => set( { options: options.filter( ( _, j ) => j !== i ) } ) }>×</Button>
+							</FlexItem>
+						</Flex>
+						<Flex align="flex-start" gap={ 2 }>
+							<FlexItem isBlock>
+								<TextControl placeholder={ __( 'Value', 'open-form-builder' ) } value={ opt.value } onChange={ ( value ) => update( i, { value } ) } __nextHasNoMarginBottom />
+							</FlexItem>
+							<FlexItem style={ { width: '90px' } }>
+								<NumberControl placeholder={ __( 'Price', 'open-form-builder' ) } value={ opt.price == null ? 0 : opt.price } min={ 0 } onChange={ ( v ) => update( i, { price: Number( v ) || 0 } ) } __nextHasNoMarginBottom />
+							</FlexItem>
+						</Flex>
+					</div>
+				</div>
 			) ) }
-			<Button variant="secondary" onClick={ () => set( { options: [ ...options, { label: '', value: '', price: 0 } ] } ) }>
+			<Button variant="secondary" onClick={ () => set( { options: [ ...options, { label: '', value: '', price: 0, image: '' } ] } ) }>
 				{ __( 'Add option', 'open-form-builder' ) }
 			</Button>
 			<p className="ofb-help">{ __( 'Price is only charged when Pricing → model is “By selected options”.', 'open-form-builder' ) }</p>
+		</div>
+	);
+}
+
+function ImagePicker( { url, onChange } ) {
+	return (
+		<div className="ofb-image-picker">
+			<button
+				type="button"
+				className="ofb-image-picker__thumb"
+				onClick={ () => openMediaPicker( onChange ) }
+				aria-label={ __( 'Choose image', 'open-form-builder' ) }
+			>
+				{ url ? <img src={ url } alt="" /> : <span>{ __( '+ Image', 'open-form-builder' ) }</span> }
+			</button>
+			{ url && (
+				<Button variant="link" isDestructive onClick={ () => onChange( '' ) }>{ __( 'Remove', 'open-form-builder' ) }</Button>
+			) }
 		</div>
 	);
 }

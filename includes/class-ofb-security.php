@@ -38,6 +38,7 @@ class OFB_Security {
 			'payments'       => self::sanitize_payments( $in['payments'] ?? [] ),
 			'emails'         => self::sanitize_emails( $in['emails'] ?? [] ),
 			'marketing'      => self::sanitize_marketing( $in['marketing'] ?? [] ),
+			'theme'          => self::sanitize_theme( $in['theme'] ?? [] ),
 			'sheet_export'   => self::sanitize_sheet_export( $in['sheet_export'] ?? [] ),
 			'redirects'      => [
 				'thank_you_url' => esc_url_raw( (string) ( $in['redirects']['thank_you_url'] ?? '' ) ),
@@ -206,6 +207,26 @@ class OFB_Security {
 			$js = substr( $js, 0, 50000 );
 		}
 		return str_ireplace( '</script', '<\/script', $js );
+	}
+
+	/**
+	 * Branding: the handful of theme knobs the renderer exposes as CSS custom
+	 * properties on the form wrapper (see OFB_Renderer::render). Kept intentionally
+	 * small — colors + corner radius — rather than a full theme/CSS system.
+	 */
+	private static function sanitize_theme( $t ): array {
+		$t = is_array( $t ) ? $t : [];
+		return [
+			'primary'    => self::clean_hex( $t['primary'] ?? '', '#2563eb' ),
+			'text'       => self::clean_hex( $t['text'] ?? '', '#111827' ),
+			'background' => self::clean_hex( $t['background'] ?? '', '#ffffff' ),
+			'radius'     => max( 0, min( 32, (int) ( $t['radius'] ?? 10 ) ) ),
+		];
+	}
+
+	private static function clean_hex( $v, string $fallback ): string {
+		$v = trim( (string) $v );
+		return preg_match( '/^#[0-9a-fA-F]{6}$/', $v ) ? $v : $fallback;
 	}
 
 	/** Non-negative money value kept as a float with cent precision. */

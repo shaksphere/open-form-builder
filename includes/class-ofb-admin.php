@@ -56,6 +56,9 @@ class OFB_Admin {
 			return;
 		}
 
+		// Media library modal, used by the option-image picker (course/service cards).
+		wp_enqueue_media();
+
 		$asset_file = OFB_DIR . 'build/index.asset.php';
 		$deps    = [ 'wp-element', 'wp-components', 'wp-api-fetch', 'wp-i18n' ];
 		$version = OFB_VERSION;

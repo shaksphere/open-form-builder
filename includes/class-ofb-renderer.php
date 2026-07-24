@@ -20,6 +20,17 @@ class OFB_Renderer {
 
 		$pricing  = is_array( $settings['pricing'] ?? null ) ? $settings['pricing'] : [];
 		$payments = is_array( $settings['payments'] ?? null ) ? $settings['payments'] : [];
+		$theme    = is_array( $settings['theme'] ?? null ) ? $settings['theme'] : [];
+
+		// Branding as CSS custom properties on the wrapper; frontend.css falls back
+		// to its own defaults when a form has no theme set (e.g. CF7-imported forms).
+		$theme_style = sprintf(
+			'--ofb-accent:%s;--ofb-text:%s;--ofb-surface:%s;--ofb-radius:%dpx;',
+			esc_attr( $theme['primary'] ?? '#2563eb' ),
+			esc_attr( $theme['text'] ?? '#111827' ),
+			esc_attr( $theme['background'] ?? '#ffffff' ),
+			(int) ( $theme['radius'] ?? 10 )
+		);
 
 		// Config the front-end script needs: pricing rules (for live preview) and
 		// the field conditional map. Pricing here is non-secret rule data only.
@@ -34,6 +45,7 @@ class OFB_Renderer {
 		?>
 		<form class="ofb-form" data-ofb-form="<?php echo esc_attr( $form_id ); ?>"
 			data-ofb-config="<?php echo esc_attr( wp_json_encode( $config ) ); ?>"
+			style="<?php echo esc_attr( $theme_style ); ?>"
 			novalidate>
 			<?php wp_nonce_field( OFB_Security::NONCE_SUBMIT, 'ofb_nonce' ); ?>
 
@@ -147,6 +159,10 @@ class OFB_Renderer {
 
 			case 'radio':
 			case 'checkbox':
+				if ( 'cards' === ( $field['config']['layout'] ?? 'list' ) ) {
+					echo self::render_choice_cards( $field, $id, $name, $type, $priced ); // phpcs:ignore
+					break;
+				}
 				$input_type = ( 'radio' === $type ) ? 'radio' : 'checkbox';
 				$brackets   = ( 'checkbox' === $type ) ? '[]' : '';
 				echo '<div class="ofb-choices">';
@@ -187,6 +203,51 @@ class OFB_Renderer {
 			printf( '<p class="ofb-help">%s</p>', esc_html( $field['help'] ) );
 		}
 		echo '<p class="ofb-field-error" hidden></p>';
+		echo '</div>';
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Choice options as a grid of image cards instead of a plain list — used for
+	 * course/service pickers (config.layout === 'cards'). Each card is a normal
+	 * radio/checkbox input wrapped in a label; CSS handles the selected state via
+	 * :has(input:checked), no extra JS needed.
+	 */
+	private static function render_choice_cards( array $field, string $id, string $name, string $type, bool $priced ): string {
+		$input_type = ( 'radio' === $type ) ? 'radio' : 'checkbox';
+		$brackets   = ( 'checkbox' === $type ) ? '[]' : '';
+
+		ob_start();
+		echo '<div class="ofb-cards">';
+		foreach ( ( $field['options'] ?? [] ) as $k => $opt ) {
+			$opt_id = $id . '-' . $k;
+			$image  = (string) ( $opt['image'] ?? '' );
+			$price  = (float) ( $opt['price'] ?? 0 );
+
+			echo '<label class="ofb-card" for="' . esc_attr( $opt_id ) . '">';
+			printf(
+				'<input class="ofb-card__input" type="%s" id="%s" name="%s%s" value="%s"%s>',
+				esc_attr( $input_type ), esc_attr( $opt_id ), esc_attr( $name ),
+				esc_attr( $brackets ), esc_attr( $opt['value'] ), self::price_attr( $opt )
+			);
+			echo '<span class="ofb-card__media">';
+			if ( '' !== $image ) {
+				echo '<img src="' . esc_url( $image ) . '" alt="" loading="lazy">';
+			} else {
+				// No image yet: a letter monogram keeps the card looking intentional.
+				$initial = function_exists( 'mb_substr' ) ? mb_substr( trim( (string) $opt['label'] ), 0, 1 ) : substr( trim( (string) $opt['label'] ), 0, 1 );
+				echo '<span class="ofb-card__media-placeholder" aria-hidden="true">' . esc_html( strtoupper( $initial ) ?: '?' ) . '</span>';
+			}
+			echo '</span>';
+			echo '<span class="ofb-card__body">';
+			echo '<span class="ofb-card__label">' . esc_html( $opt['label'] ) . '</span>';
+			if ( $priced && $price > 0 ) {
+				echo '<span class="ofb-card__price">$' . esc_html( number_format( $price, 2 ) ) . '</span>';
+			}
+			echo '</span>';
+			echo '<span class="ofb-card__check" aria-hidden="true"></span>';
+			echo '</label>';
+		}
 		echo '</div>';
 		return (string) ob_get_clean();
 	}

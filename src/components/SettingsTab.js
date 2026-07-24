@@ -5,8 +5,10 @@
 import { __ } from '@wordpress/i18n';
 import {
 	Card, CardBody, CardHeader, ToggleControl, TextControl, TextareaControl, SelectControl, ExternalLink,
+	Flex, FlexItem, __experimentalNumberControl as NumberControl,
 } from '@wordpress/components';
 import { api } from '../api';
+import { defaultTheme } from '../defaults';
 
 export default function SettingsTab( { form, onChange } ) {
 	const settings = form.settings;
@@ -15,6 +17,8 @@ export default function SettingsTab( { form, onChange } ) {
 	const sheet = settings.sheet_export;
 	const marketing = settings.marketing || { enabled: false, provider: 'mailchimp', list_id: '', email_field: '', name_field: '', tags: '', double_optin: false };
 	function setMarketing( partial ) { set( { marketing: { ...marketing, ...partial } } ); }
+	const theme = settings.theme || defaultTheme();
+	function setTheme( partial ) { set( { theme: { ...theme, ...partial } } ); }
 
 	const fieldNames = [];
 	( form.schema.steps || [] ).forEach( ( s ) => s.fields.forEach( ( f ) => {
@@ -23,6 +27,30 @@ export default function SettingsTab( { form, onChange } ) {
 
 	return (
 		<div>
+			<Card>
+				<CardHeader><strong>{ __( 'Branding', 'open-form-builder' ) }</strong></CardHeader>
+				<CardBody>
+					<p className="ofb-help">{ __( 'Sets the accent color, text color, background and corner roundness the front-end form uses everywhere — buttons, active steps, selected cards and chips.', 'open-form-builder' ) }</p>
+					<Flex align="flex-start">
+						<FlexItem isBlock><ColorField label={ __( 'Primary / accent color', 'open-form-builder' ) } value={ theme.primary } onChange={ ( primary ) => setTheme( { primary } ) } /></FlexItem>
+						<FlexItem isBlock><ColorField label={ __( 'Heading & label text', 'open-form-builder' ) } value={ theme.text } onChange={ ( text ) => setTheme( { text } ) } /></FlexItem>
+					</Flex>
+					<Flex align="flex-start">
+						<FlexItem isBlock><ColorField label={ __( 'Form background', 'open-form-builder' ) } value={ theme.background } onChange={ ( background ) => setTheme( { background } ) } /></FlexItem>
+						<FlexItem isBlock>
+							<NumberControl
+								label={ __( 'Corner roundness (px)', 'open-form-builder' ) }
+								value={ theme.radius }
+								min={ 0 }
+								max={ 32 }
+								onChange={ ( v ) => setTheme( { radius: parseInt( v || 0, 10 ) } ) }
+							/>
+						</FlexItem>
+					</Flex>
+					<ThemePreview theme={ theme } />
+				</CardBody>
+			</Card>
+
 			<Card>
 				<CardHeader><strong>{ __( 'Payments', 'open-form-builder' ) }</strong></CardHeader>
 				<CardBody>
@@ -147,6 +175,41 @@ export default function SettingsTab( { form, onChange } ) {
 					/>
 				</CardBody>
 			</Card>
+		</div>
+	);
+}
+
+function ColorField( { label, value, onChange } ) {
+	return (
+		<div className="ofb-color-field">
+			<label className="ofb-color-field__label">{ label }</label>
+			<div className="ofb-color-field__row">
+				<input type="color" value={ value } onChange={ ( e ) => onChange( e.target.value ) } />
+				<TextControl value={ value } onChange={ onChange } __nextHasNoMarginBottom />
+			</div>
+		</div>
+	);
+}
+
+/** Small WYSIWYG preview so the admin can see the branding before saving. */
+function ThemePreview( { theme } ) {
+	const style = {
+		'--ofb-accent': theme.primary,
+		'--ofb-text': theme.text,
+		'--ofb-surface': theme.background,
+		'--ofb-radius': `${ theme.radius }px`,
+	};
+	return (
+		<div className="ofb-theme-preview" style={ style }>
+			<div className="ofb-theme-preview__card">
+				<div className="ofb-theme-preview__label">{ __( 'Sample field', 'open-form-builder' ) }</div>
+				<div className="ofb-theme-preview__input" />
+				<div className="ofb-theme-preview__chips">
+					<span className="ofb-theme-preview__chip is-selected">{ __( 'Selected', 'open-form-builder' ) }</span>
+					<span className="ofb-theme-preview__chip">{ __( 'Option', 'open-form-builder' ) }</span>
+				</div>
+				<button type="button" className="ofb-theme-preview__btn">{ __( 'Continue', 'open-form-builder' ) }</button>
+			</div>
 		</div>
 	);
 }

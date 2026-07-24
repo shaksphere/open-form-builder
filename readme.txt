@@ -4,15 +4,15 @@ Tags: forms, form builder, multi-step, stripe, conditional logic
 Requires at least: 6.2
 Tested up to: 6.5
 Requires PHP: 8.0
-Stable tag: 0.3.0
+Stable tag: 0.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A CF7-style form builder with multi-step wizards, conditional logic, a
-capacity-aware session picker, two pricing models (sessions or priced
-options/quantities), Stripe Checkout, date/time fields, conditional emails,
-Mailchimp/MailerLite sync, Google Sheet export and CF7 import. Forms are
-declarative JSON schemas.
+A CF7-style form builder with 5 starter templates, multi-step wizards,
+conditional logic, image-card choice fields, a capacity-aware session picker,
+two pricing models (sessions or priced options/quantities), per-form branding,
+Stripe Checkout, date/time fields, conditional emails, Mailchimp/MailerLite
+sync, Google Sheet export and CF7 import. Forms are declarative JSON schemas.
 
 == Description ==
 
@@ -25,8 +25,15 @@ Features:
 
 * React admin builder using @wordpress/components (matches Gutenberg).
 * Multi-step (wizard) forms with drag-and-drop fields.
+* 5 starter templates (Contact, Lesson & Session Booking, Course & Certification
+  Enrolment, Service Booking, Quote / Estimate Calculator) — pick one to prefill
+  a working, on-brand form; every field, price and colour stays editable.
 * Field types: text, email, tel, number, date, time, textarea, select, dropdown,
   radio, checkbox, HTML content block, and a capacity-aware session picker.
+* Radio/checkbox fields can render as an image-card grid (with a WP media-library
+  picker) instead of a plain list — for courses, services or products.
+* Per-form branding: accent colour, text colour, background and corner radius,
+  applied everywhere on the front end (buttons, active steps, selected cards).
 * Per-field conditional show/hide.
 * Personalisation tags ({field_name}) in confirmation content and emails.
 * Two pricing models:
@@ -48,6 +55,18 @@ Features:
 4. Build a form, copy its shortcode, and drop it on any page or post.
 
 == Changelog ==
+
+= 0.4.0 =
+* 5 built-in starter templates covering the most common use cases: contact,
+  lesson/session booking, course & certification enrolment, service booking,
+  and a no-payment quote calculator. Pick one from the "Add new form" screen.
+* Image-card layout for radio/checkbox fields (with a WP media picker per
+  option) — built for course, product and service pickers.
+* Per-form branding: accent/text/background colour and corner radius, set on
+  the Settings tab and applied across the whole front-end form via CSS custom
+  properties, with a live preview in the builder.
+* General front-end visual pass: the form now renders as a shadowed surface
+  card; refined buttons, chips, progress steps and pricing summary.
 
 = 0.3.0 =
 * New "priced options" pricing model: per-option prices on select/radio/checkbox

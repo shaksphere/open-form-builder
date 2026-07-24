@@ -14,8 +14,8 @@ import EmailsTab from './EmailsTab';
 import SettingsTab from './SettingsTab';
 import SubmissionsTab from './SubmissionsTab';
 
-export default function Editor( { formId, onBack, notify } ) {
-	const [ form, setForm ] = useState( formId ? null : blankForm() );
+export default function Editor( { formId, initialForm, onBack, notify } ) {
+	const [ form, setForm ] = useState( formId ? null : ( initialForm ? { id: 0, ...initialForm } : blankForm() ) );
 	const [ saving, setSaving ] = useState( false );
 
 	useEffect( () => {

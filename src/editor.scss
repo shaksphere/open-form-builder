@@ -1,19 +1,95 @@
 /* Open Form Builder — admin builder styles. Layered on top of @wordpress/components. */
 .ofb-admin {
-	&__title { margin: 1rem 0; }
+	max-width: 1100px;
+	&__title { margin: 1.25rem 0 1.5rem; font-size: 1.6rem; }
 	&__snackbars { position: fixed; bottom: 20px; left: 20px; z-index: 100000; }
 }
 
 .ofb-list {
-	&__actions { display: flex; gap: .5rem; margin-bottom: 1rem; }
-	&__item { margin-bottom: .6rem; }
+	&__actions { display: flex; gap: .5rem; margin-bottom: 1.25rem; }
+	&__item {
+		margin-bottom: .6rem; border-radius: 8px; box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+		transition: box-shadow .12s;
+		&:hover { box-shadow: 0 2px 8px rgba(16, 24, 40, .08); }
+	}
 	&__row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
-	&__shortcode { display: flex; align-items: center; gap: .4rem; margin-top: .25rem; }
+	&__shortcode { display: flex; align-items: center; gap: .4rem; margin-top: .3rem; }
 	&__buttons { display: flex; gap: .4rem; }
 }
 
 .ofb-editor {
-	&__bar { background: #fff; padding: 1rem; border: 1px solid #e0e0e0; border-radius: 6px; margin-bottom: 1rem; align-items: flex-end; gap: 1rem; }
+	&__bar { background: #fff; padding: 1rem 1.25rem; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 1.25rem; align-items: flex-end; gap: 1rem; box-shadow: 0 1px 2px rgba(16, 24, 40, .04); }
+}
+
+/* ---- Template picker ------------------------------------------------- */
+.ofb-templates {
+	&__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem;
+		h2 { margin: 0 0 .25rem; }
+		p { margin: 0; color: #757575; }
+	}
+	&__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; }
+}
+
+.ofb-template-card {
+	--ofb-tpl-accent: #2563eb;
+	display: flex; flex-direction: column; align-items: flex-start; gap: .4rem; text-align: left;
+	background: #fff; border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 1.25rem 1.25rem 1.4rem;
+	cursor: pointer; font: inherit; color: inherit; position: relative; overflow: hidden;
+	transition: border-color .12s, box-shadow .12s, transform .1s;
+
+	&::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--ofb-tpl-accent); }
+	&:hover { border-color: var(--ofb-tpl-accent); box-shadow: 0 4px 14px rgba(16, 24, 40, .08); transform: translateY(-1px); }
+	&:focus-visible { outline: 2px solid var(--ofb-tpl-accent); outline-offset: 2px; }
+
+	&__icon { font-size: 1.8rem; line-height: 1; margin-bottom: .2rem; }
+	&__name { font-weight: 700; font-size: 1.02rem; }
+	&__desc { color: #666; font-size: .87rem; line-height: 1.4; }
+
+	&--blank { border-style: dashed; --ofb-tpl-accent: #8c8f94;
+		&::before { display: none; }
+	}
+}
+
+/* ---- Branding: color fields + live preview ---------------------------- */
+.ofb-color-field {
+	margin-bottom: 1rem;
+	&__label { display: block; font-size: .8rem; font-weight: 500; margin-bottom: .35rem; text-transform: uppercase; letter-spacing: .03em; color: #50575e; }
+	&__row { display: flex; align-items: center; gap: .5rem;
+		input[type="color"] { width: 2.4rem; height: 2.4rem; padding: 2px; border: 1px solid #e0e0e0; border-radius: 6px; cursor: pointer; flex: 0 0 auto; }
+		.components-text-control__input { flex: 1; }
+	}
+}
+
+.ofb-theme-preview {
+	margin-top: 1rem; padding: 1.5rem; background: #f3f4f6; border-radius: 10px;
+	&__card {
+		max-width: 320px; background: var(--ofb-surface, #fff); border: 1px solid #e2e5ea; border-radius: var(--ofb-radius, 10px);
+		padding: 1.25rem; box-shadow: 0 1px 3px rgba(16, 24, 40, .06);
+	}
+	&__label { font-weight: 600; font-size: .85rem; margin-bottom: .4rem; color: var(--ofb-text, #111827); }
+	&__input { height: 2.4rem; border: 1px solid #e2e5ea; border-radius: calc(var(--ofb-radius, 10px) * .6); margin-bottom: .8rem; background: #fff; }
+	&__chips { display: flex; gap: .5rem; margin-bottom: 1rem; }
+	&__chip {
+		font-size: .8rem; padding: .4rem .8rem; border-radius: calc(var(--ofb-radius, 10px) * .6); border: 1px solid #e2e5ea;
+		&.is-selected { background: var(--ofb-accent, #2563eb); border-color: var(--ofb-accent, #2563eb); color: #fff; font-weight: 600; }
+	}
+	&__btn {
+		border: none; background: var(--ofb-accent, #2563eb); color: #fff; font-weight: 600; padding: .6rem 1.2rem;
+		border-radius: calc(var(--ofb-radius, 10px) * .6); cursor: default; font-size: .9rem;
+	}
+}
+
+/* ---- Option image picker ---------------------------------------------- */
+.ofb-image-picker {
+	display: flex; flex-direction: column; align-items: center; gap: .2rem; width: 4.5rem; flex: 0 0 auto;
+	&__thumb {
+		width: 4.5rem; height: 4.5rem; border: 1.5px dashed #c3c4c7; border-radius: 6px; background: #f6f7f7;
+		display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; padding: 0;
+		font-size: .72rem; color: #757575; text-align: center;
+		img { width: 100%; height: 100%; object-fit: cover; }
+		&:hover { border-color: var(--wp-admin-theme-color, #3858e9); color: var(--wp-admin-theme-color, #3858e9); }
+	}
+	.components-button.is-link { font-size: .72rem; }
 }
 
 .ofb-build {
@@ -45,7 +121,12 @@
 }
 
 .ofb-subhead { font-weight: 600; margin: 1rem 0 .25rem; }
-.ofb-options__row { gap: .4rem; align-items: flex-end; margin-bottom: .4rem; }
+
+.ofb-option-card {
+	display: flex; gap: .6rem; align-items: flex-start;
+	padding: .6rem; margin-bottom: .5rem; background: #f6f7f7; border: 1px solid #e0e0e0; border-radius: 6px;
+	&__fields { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .35rem; }
+}
 .ofb-conditional, .ofb-session-config, .ofb-options { border-top: 1px solid #f0f0f0; margin-top: 1rem; padding-top: .5rem; }
 
 .ofb-price-preview { border-collapse: collapse; margin-top: .5rem;
