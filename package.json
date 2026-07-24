@@ -1,0 +1,14 @@
+{
+  "name": "open-form-builder",
+  "version": "0.2.1",
+  "description": "Admin React builder for the Open Form Builder plugin.",
+  "private": true,
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "start": "wp-scripts start",
+    "build": "wp-scripts build"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^27.0.0"
+  }
+}

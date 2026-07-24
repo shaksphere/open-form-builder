@@ -1,0 +1,69 @@
+/* Open Form Builder — admin builder styles. Layered on top of @wordpress/components. */
+.ofb-admin {
+	&__title { margin: 1rem 0; }
+	&__snackbars { position: fixed; bottom: 20px; left: 20px; z-index: 100000; }
+}
+
+.ofb-list {
+	&__actions { display: flex; gap: .5rem; margin-bottom: 1rem; }
+	&__item { margin-bottom: .6rem; }
+	&__row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+	&__shortcode { display: flex; align-items: center; gap: .4rem; margin-top: .25rem; }
+	&__buttons { display: flex; gap: .4rem; }
+}
+
+.ofb-editor {
+	&__bar { background: #fff; padding: 1rem; border: 1px solid #e0e0e0; border-radius: 6px; margin-bottom: 1rem; align-items: flex-end; gap: 1rem; }
+}
+
+.ofb-build {
+	display: grid;
+	grid-template-columns: 1fr 380px;
+	gap: 1rem;
+	align-items: start;
+
+	&__canvas { display: flex; flex-direction: column; gap: 1rem; }
+	&__add { gap: .5rem; align-items: flex-end; margin-top: .5rem; }
+	&__add-step { align-self: flex-start; }
+	&__inspector { position: sticky; top: 40px; }
+}
+
+.ofb-step-col {
+	&__remove { margin-top: .5rem; }
+}
+
+.ofb-field-list { list-style: none; margin: .5rem 0; padding: 0; min-height: 40px; }
+.ofb-field-row {
+	display: flex; align-items: center; gap: .5rem;
+	padding: .5rem .6rem; margin-bottom: .35rem;
+	background: #f6f7f7; border: 1px solid #e0e0e0; border-radius: 4px; cursor: pointer;
+	&.is-selected { border-color: var(--wp-admin-theme-color, #3858e9); box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #3858e9); }
+	&--empty { justify-content: center; color: #757575; font-style: italic; cursor: default; }
+	&__handle { cursor: grab; color: #999; }
+	&__label { flex: 1; }
+	&__type { font-size: .75rem; color: #757575; background: #fff; padding: .1rem .4rem; border-radius: 3px; }
+}
+
+.ofb-subhead { font-weight: 600; margin: 1rem 0 .25rem; }
+.ofb-options__row { gap: .4rem; align-items: flex-end; margin-bottom: .4rem; }
+.ofb-conditional, .ofb-session-config, .ofb-options { border-top: 1px solid #f0f0f0; margin-top: 1rem; padding-top: .5rem; }
+
+.ofb-price-preview { border-collapse: collapse; margin-top: .5rem;
+	th, td { border: 1px solid #e0e0e0; padding: .3rem .8rem; text-align: left; }
+}
+
+.ofb-slot-row { gap: .5rem; margin-bottom: .6rem; padding-bottom: .6rem; border-bottom: 1px solid #f0f0f0; }
+.ofb-slot-booked { font-size: .8rem; color: #757575; white-space: nowrap; }
+.ofb-period { border: 1px solid #f0f0f0; border-radius: 6px; padding: .8rem; margin-bottom: .8rem; }
+.ofb-range-row { gap: .5rem; margin-top: .4rem; }
+.ofb-slot-exceptions__hint { font-size: .8rem; color: #a06b00; margin: .2rem 0 0; }
+.ofb-slot-exceptions__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .2rem .8rem; margin: .4rem 0 .2rem; padding: .6rem; background: #f6f7f7; border-radius: 6px; }
+
+.ofb-mail-card { margin-bottom: 1rem; }
+.ofb-modal__actions { display: flex; gap: .5rem; margin-top: 1rem; }
+
+.ofb-submissions { margin-top: 1rem;
+	td { vertical-align: top; }
+}
+.ofb-flag { color: #d63638; }
+.ofb-help { color: #757575; font-size: .85rem; }

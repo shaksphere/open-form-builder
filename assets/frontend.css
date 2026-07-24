@@ -1,0 +1,87 @@
+/* Open Form Builder — front-end styles. Deliberately light so the active theme
+   leads; uses CSS variables for easy per-site overriding. */
+.ofb-form {
+	--ofb-accent: #2563eb;
+	--ofb-border: #d1d5db;
+	--ofb-error: #dc2626;
+	--ofb-muted: #6b7280;
+	max-width: 720px;
+	margin: 0 auto;
+}
+
+/* Progress */
+.ofb-progress { display: flex; flex-wrap: wrap; gap: .5rem; list-style: none; margin: 0 0 1.5rem; padding: 0; }
+.ofb-progress__item { display: flex; align-items: center; gap: .4rem; color: var(--ofb-muted); font-size: .85rem; flex: 1; min-width: 0; }
+.ofb-progress__num { display: inline-flex; align-items: center; justify-content: center; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: #e5e7eb; color: #374151; font-weight: 600; flex: 0 0 auto; }
+.ofb-progress__item.is-active { color: #111827; }
+.ofb-progress__item.is-active .ofb-progress__num { background: var(--ofb-accent); color: #fff; }
+.ofb-progress__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Steps */
+.ofb-step { display: none; }
+.ofb-step.is-active { display: block; animation: ofb-fade .2s ease; }
+@keyframes ofb-fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.ofb-step__title { margin: 0 0 .25rem; }
+.ofb-step__desc { margin: 0 0 1rem; color: var(--ofb-muted); }
+
+/* Fields */
+.ofb-field { margin: 0 0 1.1rem; }
+.ofb-field[hidden] { display: none; }
+.ofb-label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.ofb-required { color: var(--ofb-error); }
+.ofb-input { width: 100%; padding: .6rem .7rem; border: 1px solid var(--ofb-border); border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+.ofb-input:focus { outline: 2px solid var(--ofb-accent); outline-offset: 1px; border-color: var(--ofb-accent); }
+textarea.ofb-input { min-height: 120px; resize: vertical; }
+.ofb-help { margin: .3rem 0 0; font-size: .85rem; color: var(--ofb-muted); }
+.ofb-choices { display: flex; flex-direction: column; gap: .4rem; }
+.ofb-choice { display: flex; align-items: center; gap: .5rem; cursor: pointer; }
+.ofb-field.has-error .ofb-input { border-color: var(--ofb-error); }
+.ofb-field-error { color: var(--ofb-error); font-size: .85rem; margin: .3rem 0 0; }
+
+/* Session picker — tabs */
+.ofb-tabs { display: flex; gap: .25rem; border-bottom: 1px solid var(--ofb-border); margin-bottom: 1rem; flex-wrap: wrap; }
+.ofb-tab { background: none; border: none; padding: .6rem 1rem; cursor: pointer; font-weight: 600; color: var(--ofb-muted); border-bottom: 2px solid transparent; }
+.ofb-tab.is-active { color: var(--ofb-accent); border-bottom-color: var(--ofb-accent); }
+.ofb-period-dates { margin: 0 0 1rem; font-size: .9rem; color: var(--ofb-muted); }
+.ofb-session-count { margin-top: .8rem; font-size: .95rem; font-weight: 600; }
+.ofb-empty { color: var(--ofb-muted); }
+
+/* Session picker — teacher cards (doctor-booking style) */
+.ofb-teacher-card { border: 1px solid var(--ofb-border); border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: 1rem; background: #fff; }
+.ofb-teacher-card__head { font-weight: 700; font-size: 1.05rem; margin-bottom: .8rem; }
+.ofb-day-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .9rem; }
+.ofb-day-col { display: flex; flex-direction: column; gap: .45rem; }
+.ofb-day-col__head { font-weight: 600; font-size: .82rem; text-transform: uppercase; letter-spacing: .03em; color: var(--ofb-muted); padding-bottom: .35rem; border-bottom: 1px solid #eef0f2; }
+
+/* Time chips */
+.ofb-chip { position: relative; display: flex; align-items: center; justify-content: center; gap: .35rem; border: 1px solid var(--ofb-border); border-radius: 8px; padding: .55rem .4rem; cursor: pointer; text-align: center; font-size: .92rem; transition: border-color .12s, background .12s, color .12s; }
+.ofb-chip input { position: absolute; opacity: 0; pointer-events: none; }
+.ofb-chip:hover { border-color: var(--ofb-accent); }
+.ofb-chip:has(input:checked) { background: var(--ofb-accent); border-color: var(--ofb-accent); color: #fff; font-weight: 600; }
+.ofb-chip:has(input:focus-visible) { outline: 2px solid var(--ofb-accent); outline-offset: 2px; }
+.ofb-chip.is-full { opacity: .5; cursor: not-allowed; background: #f9fafb; }
+.ofb-chip__full { font-size: .72rem; color: var(--ofb-muted); }
+.ofb-chip__excl { font-size: .68rem; color: #b45309; line-height: 1.1; }
+.ofb-chip:has(input:checked) .ofb-chip__excl { color: #fde68a; }
+
+/* Collapse long columns until "Show all times" */
+.ofb-teacher-card.is-collapsed .ofb-day-col .ofb-chip:nth-of-type(n+6) { display: none; }
+.ofb-showtimes { margin-top: .8rem; background: none; border: 1px solid var(--ofb-border); border-radius: 6px; padding: .45rem 1rem; cursor: pointer; font-weight: 600; color: var(--ofb-accent); }
+.ofb-showtimes:hover { border-color: var(--ofb-accent); }
+
+/* Pricing summary */
+.ofb-pricing-summary { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f3f4f6; border-radius: 8px; margin: 1rem 0; font-size: 1.15rem; }
+.ofb-pricing-summary__value { font-weight: 700; }
+
+/* Nav + buttons */
+.ofb-nav { display: flex; gap: .6rem; justify-content: space-between; margin-top: 1.5rem; }
+.ofb-btn { padding: .65rem 1.4rem; border-radius: 6px; border: 1px solid var(--ofb-accent); background: var(--ofb-accent); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; }
+.ofb-btn--prev { background: #fff; color: var(--ofb-accent); }
+.ofb-btn--next { margin-left: auto; }
+.ofb-btn[disabled] { opacity: .6; cursor: default; }
+
+/* Messages */
+.ofb-message { padding: 1rem; border-radius: 8px; margin-top: 1rem; }
+.ofb-message.is-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.ofb-message.is-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.ofb-notice { padding: .6rem; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 6px; }
