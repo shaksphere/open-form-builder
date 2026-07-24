@@ -35,7 +35,7 @@ class OFB_Schema {
 	const VERSION = 1;
 
 	/** Field types that collect a value from the visitor. */
-	const INPUT_TYPES = [ 'text', 'email', 'tel', 'number', 'textarea', 'select', 'radio', 'checkbox', 'dropdown', 'session_picker' ];
+	const INPUT_TYPES = [ 'text', 'email', 'tel', 'number', 'date', 'time', 'textarea', 'select', 'radio', 'checkbox', 'dropdown', 'session_picker' ];
 
 	/** Field types that render content but collect nothing. */
 	const STATIC_TYPES = [ 'html' ];
@@ -154,14 +154,21 @@ class OFB_Schema {
 			if ( '' === $label && '' === $value ) {
 				continue;
 			}
-			$out[] = [ 'label' => $label, 'value' => ( '' !== $value ? $value : $label ) ];
+			// Optional per-option price feeds the "priced options" pricing model.
+			$price = isset( $opt['price'] ) && is_numeric( $opt['price'] ) ? round( (float) $opt['price'], 2 ) : 0.0;
+			$out[] = [ 'label' => $label, 'value' => ( '' !== $value ? $value : $label ), 'price' => $price ];
 		}
 		return $out;
 	}
 
-	/** Per-type config. Currently only the session picker uses it. */
+	/** Per-type config (session-picker tabs/limits, number unit pricing). */
 	private static function normalize_config( string $type, $config ): array {
 		$config = is_array( $config ) ? $config : [];
+		if ( 'number' === $type ) {
+			// unit_price multiplies the entered number into the "priced options" total.
+			$unit = isset( $config['unit_price'] ) && is_numeric( $config['unit_price'] ) ? round( (float) $config['unit_price'], 2 ) : 0.0;
+			return [ 'unit_price' => $unit ];
+		}
 		if ( 'session_picker' === $type ) {
 			$min = isset( $config['min'] ) ? max( 0, (int) $config['min'] ) : 4;
 			$max = ( isset( $config['max'] ) && '' !== $config['max'] && null !== $config['max'] )

@@ -92,7 +92,15 @@ class OFB_Submissions {
 		}
 
 		$sessions = count( $session_keys );
-		$amount   = OFB_Pricing::total( is_array( $settings['pricing'] ?? null ) ? $settings['pricing'] : [], $sessions );
+		$pricing  = is_array( $settings['pricing'] ?? null ) ? $settings['pricing'] : [];
+		// Two pricing models: 'sessions' (count-based tiers) or 'options' (sum of
+		// selected priced choices + number × unit price). Both computed server-side
+		// from the stored schema — never trust a price sent by the browser.
+		if ( 'options' === ( $pricing['mode'] ?? 'sessions' ) ) {
+			$amount = OFB_Pricing::options_total( $pricing, $fields, $data );
+		} else {
+			$amount = OFB_Pricing::total( $pricing, $sessions );
+		}
 
 		return [
 			'ok'           => empty( $errors ),
@@ -105,6 +113,21 @@ class OFB_Submissions {
 	}
 
 	private static function clean_value( string $type, $raw ) {
+		// Checkboxes are the only genuinely multi-value field.
+		if ( 'checkbox' === $type ) {
+			$arr = is_array( $raw ) ? $raw : ( '' === $raw ? [] : [ $raw ] );
+			return array_values( array_map( 'sanitize_text_field', array_map( 'strval', $arr ) ) );
+		}
+		// Every other type is single-value, but a radio arrives from the front end as
+		// a one-element array (["repair"]). Collapse it so the value is the real
+		// string, not PHP's "Array" cast — that broke radio storage and priced-option
+		// matching alike.
+		if ( is_array( $raw ) ) {
+			$raw = reset( $raw );
+			if ( false === $raw ) {
+				$raw = '';
+			}
+		}
 		switch ( $type ) {
 			case 'email':
 				return sanitize_email( (string) $raw );
@@ -112,9 +135,12 @@ class OFB_Submissions {
 				return sanitize_textarea_field( (string) $raw );
 			case 'number':
 				return is_numeric( $raw ) ? $raw + 0 : '';
-			case 'checkbox':
-				$arr = is_array( $raw ) ? $raw : ( '' === $raw ? [] : [ $raw ] );
-				return array_values( array_map( 'sanitize_text_field', array_map( 'strval', $arr ) ) );
+			case 'date':
+				$d = trim( (string) $raw );
+				return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) ? $d : '';
+			case 'time':
+				$t = trim( (string) $raw );
+				return preg_match( '/^\d{2}:\d{2}$/', $t ) ? $t : '';
 			default:
 				return sanitize_text_field( (string) $raw );
 		}
@@ -275,6 +301,7 @@ class OFB_Submissions {
 		];
 
 		OFB_Emails::send_on_success( $form['settings'], $sub['data'], $extra );
+		OFB_Marketing::sync( $form['settings'], $sub['data'], $extra );
 		OFB_Sheets::export( $form['settings'], $sub['data'], $extra );
 
 		do_action( 'ofb_submission_finalized', $submission_id, $sub, $form, $flagged );

@@ -14,6 +14,8 @@ export const FIELD_TYPES = [
 	{ value: 'email', label: 'Email' },
 	{ value: 'tel', label: 'Phone' },
 	{ value: 'number', label: 'Number' },
+	{ value: 'date', label: 'Date' },
+	{ value: 'time', label: 'Time' },
 	{ value: 'textarea', label: 'Text area' },
 	{ value: 'select', label: 'Select' },
 	{ value: 'dropdown', label: 'Dropdown' },
@@ -50,7 +52,10 @@ export function newField( type = 'text' ) {
 		conditional: { enabled: false, action: 'show', match: 'all', rules: [] },
 	};
 	if ( CHOICE_TYPES.includes( type ) ) {
-		field.options = [ { label: 'Option 1', value: 'option-1' } ];
+		field.options = [ { label: 'Option 1', value: 'option-1', price: 0 } ];
+	}
+	if ( type === 'number' ) {
+		field.config = { unit_price: 0 };
 	}
 	if ( type === 'html' ) {
 		field.content = '<p>Your content here.</p>';
@@ -88,6 +93,8 @@ export function defaultSettings() {
 	return {
 		pricing: {
 			enabled: false,
+			mode: 'sessions',
+			base_fee: 0,
 			base_price: 80,
 			base_sessions: 4,
 			extra_session_price: 25,
@@ -107,6 +114,15 @@ export function defaultSettings() {
 			confirmation: { enabled: false, to: '', subject: '', body: '' },
 			receipt: { enabled: false, to: '', subject: '', body: '' },
 			routing: { field: '', map: [], default: '' },
+		},
+		marketing: {
+			enabled: false,
+			provider: 'mailchimp',
+			list_id: '',
+			email_field: '',
+			name_field: '',
+			tags: '',
+			double_optin: false,
 		},
 		sheet_export: { enabled: false, webhook_url: '' },
 		redirects: { thank_you_url: '' },

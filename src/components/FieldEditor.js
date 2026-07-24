@@ -70,6 +70,7 @@ export default function FieldEditor( { field, allFields, onChange, onRemove } ) 
 				) }
 
 				{ isChoice && <OptionsEditor field={ field } set={ set } /> }
+				{ field.type === 'number' && <NumberConfig field={ field } set={ set } /> }
 				{ field.type === 'session_picker' && <SessionConfig field={ field } set={ set } /> }
 
 				<ConditionalEditor field={ field } allFields={ allFields } set={ set } />
@@ -95,13 +96,33 @@ function OptionsEditor( { field, set } ) {
 						<TextControl placeholder={ __( 'Value', 'open-form-builder' ) } value={ opt.value } onChange={ ( value ) => update( i, { value } ) } __nextHasNoMarginBottom />
 					</FlexItem>
 					<FlexItem>
+						<NumberControl placeholder={ __( 'Price', 'open-form-builder' ) } value={ opt.price == null ? 0 : opt.price } min={ 0 } onChange={ ( v ) => update( i, { price: Number( v ) || 0 } ) } __nextHasNoMarginBottom />
+					</FlexItem>
+					<FlexItem>
 						<Button isDestructive variant="tertiary" onClick={ () => set( { options: options.filter( ( _, j ) => j !== i ) } ) }>×</Button>
 					</FlexItem>
 				</Flex>
 			) ) }
-			<Button variant="secondary" onClick={ () => set( { options: [ ...options, { label: '', value: '' } ] } ) }>
+			<Button variant="secondary" onClick={ () => set( { options: [ ...options, { label: '', value: '', price: 0 } ] } ) }>
 				{ __( 'Add option', 'open-form-builder' ) }
 			</Button>
+			<p className="ofb-help">{ __( 'Price is only charged when Pricing → model is “By selected options”.', 'open-form-builder' ) }</p>
+		</div>
+	);
+}
+
+function NumberConfig( { field, set } ) {
+	const cfg = field.config || { unit_price: 0 };
+	return (
+		<div className="ofb-number-config">
+			<p className="ofb-subhead">{ __( 'Number pricing', 'open-form-builder' ) }</p>
+			<NumberControl
+				label={ __( 'Unit price ($) — multiplies the entered number into the total (0 = off)', 'open-form-builder' ) }
+				value={ cfg.unit_price || 0 }
+				min={ 0 }
+				onChange={ ( v ) => set( { config: { ...cfg, unit_price: Number( v ) || 0 } } ) }
+			/>
+			<p className="ofb-help">{ __( 'e.g. “Number of rooms” × $30. Only applied in “By selected options” pricing.', 'open-form-builder' ) }</p>
 		</div>
 	);
 }

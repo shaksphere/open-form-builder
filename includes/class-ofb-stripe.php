@@ -30,6 +30,8 @@ class OFB_Stripe {
 			'live_secret'     => (string) ( $o['live_secret'] ?? '' ),
 			'live_publishable'=> (string) ( $o['live_publishable'] ?? '' ),
 			'webhook_secret'  => (string) ( $o['webhook_secret'] ?? '' ),
+			'mailchimp_api_key'  => (string) ( $o['mailchimp_api_key'] ?? '' ),
+			'mailerlite_api_key' => (string) ( $o['mailerlite_api_key'] ?? '' ),
 		];
 	}
 

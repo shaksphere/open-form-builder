@@ -104,6 +104,8 @@ class OFB_Admin {
 			'live_secret'      => sanitize_text_field( (string) ( $in['live_secret'] ?? '' ) ),
 			'live_publishable' => sanitize_text_field( (string) ( $in['live_publishable'] ?? '' ) ),
 			'webhook_secret'   => sanitize_text_field( (string) ( $in['webhook_secret'] ?? '' ) ),
+			'mailchimp_api_key'  => sanitize_text_field( (string) ( $in['mailchimp_api_key'] ?? '' ) ),
+			'mailerlite_api_key' => sanitize_text_field( (string) ( $in['mailerlite_api_key'] ?? '' ) ),
 		];
 	}
 
@@ -148,6 +150,15 @@ class OFB_Admin {
 							<p class="description"><?php esc_html_e( 'In Stripe → Developers → Webhooks, add this URL and subscribe to the "checkout.session.completed" event. Paste the signing secret above.', 'open-form-builder' ); ?></p>
 						</td>
 					</tr>
+				</table>
+
+				<h2><?php esc_html_e( 'Email marketing', 'open-form-builder' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'Optional. Add a key to let forms subscribe people to your list. Pick the provider, audience/group id and field mapping per form on its Settings tab.', 'open-form-builder' ); ?></p>
+				<table class="form-table" role="presentation">
+					<?php
+					$this->key_row( __( 'Mailchimp API key', 'open-form-builder' ), 'mailchimp_api_key', $s['mailchimp_api_key'] );
+					$this->key_row( __( 'MailerLite API key', 'open-form-builder' ), 'mailerlite_api_key', $s['mailerlite_api_key'] );
+					?>
 				</table>
 				<?php submit_button(); ?>
 			</form>

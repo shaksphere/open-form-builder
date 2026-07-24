@@ -24,9 +24,10 @@ class OFB_Renderer {
 		// Config the front-end script needs: pricing rules (for live preview) and
 		// the field conditional map. Pricing here is non-secret rule data only.
 		$config = [
-			'formId'   => $form_id,
-			'pricing'  => $pricing,
-			'currency' => $payments['currency'] ?? 'aud',
+			'formId'    => $form_id,
+			'pricing'   => $pricing,
+			'currency'  => $payments['currency'] ?? 'aud',
+			'payEnabled'=> ! empty( $payments['enabled'] ),
 		];
 
 		ob_start();
@@ -108,6 +109,9 @@ class OFB_Renderer {
 			return (string) ob_get_clean();
 		}
 
+		// Only surface per-option prices in labels when the priced-options model is on.
+		$priced = ! empty( $settings['pricing']['enabled'] ) && 'options' === ( $settings['pricing']['mode'] ?? 'sessions' );
+
 		$required = ! empty( $field['required'] );
 		if ( '' !== ( $field['label'] ?? '' ) ) {
 			printf(
@@ -133,7 +137,10 @@ class OFB_Renderer {
 					printf( '<option value="">%s</option>', esc_html( $field['placeholder'] ) );
 				}
 				foreach ( ( $field['options'] ?? [] ) as $opt ) {
-					printf( '<option value="%s">%s</option>', esc_attr( $opt['value'] ), esc_html( $opt['label'] ) );
+					printf(
+						'<option value="%s"%s>%s</option>',
+						esc_attr( $opt['value'] ), self::price_attr( $opt ), esc_html( self::option_label( $opt, $priced ) )
+					);
 				}
 				echo '</select>';
 				break;
@@ -146,9 +153,10 @@ class OFB_Renderer {
 				foreach ( ( $field['options'] ?? [] ) as $k => $opt ) {
 					$opt_id = $id . '-' . $k;
 					printf(
-						'<label class="ofb-choice" for="%s"><input type="%s" id="%s" name="%s%s" value="%s"> <span>%s</span></label>',
+						'<label class="ofb-choice" for="%s"><input type="%s" id="%s" name="%s%s" value="%s"%s> <span>%s</span></label>',
 						esc_attr( $opt_id ), esc_attr( $input_type ), esc_attr( $opt_id ),
-						esc_attr( $name ), esc_attr( $brackets ), esc_attr( $opt['value'] ), esc_html( $opt['label'] )
+						esc_attr( $name ), esc_attr( $brackets ), esc_attr( $opt['value'] ),
+						self::price_attr( $opt ), esc_html( self::option_label( $opt, $priced ) )
 					);
 				}
 				echo '</div>';
@@ -158,12 +166,19 @@ class OFB_Renderer {
 				echo self::render_session_picker( $field, $form_id, $settings, $name ); // phpcs:ignore
 				break;
 
-			default: // text, email, tel, number
-				$input_type = in_array( $type, [ 'email', 'tel', 'number' ], true ) ? $type : 'text';
+			default: // text, email, tel, number, date, time
+				$input_type = in_array( $type, [ 'email', 'tel', 'number', 'date', 'time' ], true ) ? $type : 'text';
+				$extra_attr = '';
+				if ( 'number' === $type ) {
+					$unit = (float) ( $field['config']['unit_price'] ?? 0 );
+					if ( $unit ) {
+						$extra_attr = ' data-ofb-unit-price="' . esc_attr( $unit ) . '"';
+					}
+				}
 				printf(
-					'<input class="ofb-input" type="%s" id="%s" name="%s" placeholder="%s"%s>',
+					'<input class="ofb-input" type="%s" id="%s" name="%s" placeholder="%s"%s%s>',
 					esc_attr( $input_type ), esc_attr( $id ), esc_attr( $name ),
-					esc_attr( $field['placeholder'] ?? '' ), $required ? ' required' : ''
+					esc_attr( $field['placeholder'] ?? '' ), $required ? ' required' : '', $extra_attr
 				);
 				break;
 		}
@@ -174,6 +189,22 @@ class OFB_Renderer {
 		echo '<p class="ofb-field-error" hidden></p>';
 		echo '</div>';
 		return (string) ob_get_clean();
+	}
+
+	/** ` data-ofb-price="12.50"` for an option with a price, else empty. */
+	private static function price_attr( array $opt ): string {
+		$price = (float) ( $opt['price'] ?? 0 );
+		return $price ? ' data-ofb-price="' . esc_attr( $price ) . '"' : '';
+	}
+
+	/** Option label, with a "(+$X)" suffix when priced-options mode is active. */
+	private static function option_label( array $opt, bool $priced ): string {
+		$label = (string) ( $opt['label'] ?? '' );
+		$price = (float) ( $opt['price'] ?? 0 );
+		if ( $priced && $price > 0 ) {
+			$label .= ' (+$' . number_format( $price, 2 ) . ')';
+		}
+		return $label;
 	}
 
 	/**

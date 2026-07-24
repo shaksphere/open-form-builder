@@ -38,6 +38,7 @@ final class OFB_Plugin {
 		require_once $inc . 'class-ofb-slots.php';
 		require_once $inc . 'class-ofb-tags.php';
 		require_once $inc . 'class-ofb-emails.php';
+		require_once $inc . 'class-ofb-marketing.php';
 		require_once $inc . 'class-ofb-sheets.php';
 		require_once $inc . 'class-ofb-submissions.php';
 		require_once $inc . 'class-ofb-renderer.php';

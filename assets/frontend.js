@@ -173,7 +173,11 @@
 			if ( max ) {
 				var maxN = parseInt( max, 10 );
 				counter.querySelectorAll( 'input[type="checkbox"]' ).forEach( function ( cb ) {
-					if ( ! cb.checked && ! cb.closest( '.ofb-slot' ).classList.contains( 'is-full' ) ) {
+					// Full slots render as .ofb-chip.is-full; guard against a missing
+					// wrapper so a max limit never throws and breaks price/session updates.
+					var chip = cb.closest( '.ofb-chip' );
+					var isFull = chip && chip.classList.contains( 'is-full' );
+					if ( ! cb.checked && ! isFull ) {
 						cb.disabled = count >= maxN;
 					}
 				} );
@@ -188,9 +192,36 @@
 		if ( ! totalEl ) { return; }
 		var p = this.config.pricing || {};
 		if ( ! p.enabled ) { return; }
-		var sessions = this.selectedSessions().length;
-		var total = computeTotal( p, sessions );
+		var total = p.mode === 'options'
+			? this.computeOptionsTotal( p )
+			: computeTotal( p, this.selectedSessions().length );
 		totalEl.textContent = formatMoney( total, this.config.currency );
+	};
+
+	// Priced-options model: base fee + selected option prices + number × unit price.
+	// Mirrors OFB_Pricing::options_total on the server, which is the figure charged.
+	OFBForm.prototype.computeOptionsTotal = function ( p ) {
+		var total = num( p.base_fee );
+		this.el.querySelectorAll( '[data-ofb-field]' ).forEach( function ( wrap ) {
+			if ( wrap.hidden ) { return; }
+			wrap.querySelectorAll( 'input[type="checkbox"], input[type="radio"]' ).forEach( function ( input ) {
+				if ( input.disabled || ! input.checked ) { return; }
+				var pr = input.getAttribute( 'data-ofb-price' );
+				if ( pr ) { total += num( pr ); }
+			} );
+			wrap.querySelectorAll( 'select' ).forEach( function ( sel ) {
+				var opt = sel.options[ sel.selectedIndex ];
+				var pr = opt && opt.getAttribute( 'data-ofb-price' );
+				if ( pr ) { total += num( pr ); }
+			} );
+			wrap.querySelectorAll( 'input[type="number"][data-ofb-unit-price]' ).forEach( function ( input ) {
+				if ( input.disabled ) { return; }
+				var unit = num( input.getAttribute( 'data-ofb-unit-price' ) );
+				var val = num( input.value );
+				if ( unit && val ) { total += unit * val; }
+			} );
+		} );
+		return round2( Math.max( 0, total ) );
 	};
 
 	function computeTotal( p, S ) {
@@ -346,7 +377,7 @@
 	};
 
 	OFBForm.prototype.submitLabel = function () {
-		return ( this.config.pricing && this.config.pricing.enabled ) ? 'Continue to payment' : 'Submit';
+		return this.config.payEnabled ? 'Continue to payment' : 'Submit';
 	};
 
 	OFBForm.prototype.showServerErrors = function ( errors ) {

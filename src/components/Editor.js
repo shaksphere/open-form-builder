@@ -97,7 +97,7 @@ export default function Editor( { formId, onBack, notify } ) {
 						case 'emails':
 							return <EmailsTab form={ form } onChange={ updateSettings } />;
 						case 'settings':
-							return <SettingsTab settings={ form.settings } onChange={ updateSettings } />;
+							return <SettingsTab form={ form } onChange={ updateSettings } />;
 						case 'submissions':
 							return <SubmissionsTab formId={ form.id } />;
 						default:

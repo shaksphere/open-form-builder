@@ -30,15 +30,40 @@ export default function PricingTab( { settings, onChange } ) {
 
 	const previewPoints = [ p.base_sessions, p.base_sessions + 2, p.base_sessions + 4, p.base_sessions + 8, p.base_sessions + 12 ];
 
+	const mode = p.mode || 'sessions';
+
 	return (
 		<Card>
 			<CardBody>
 				<ToggleControl
-					label={ __( 'Enable pricing (charge via Stripe)', 'open-form-builder' ) }
+					label={ __( 'Enable pricing (show a live total / charge via Stripe)', 'open-form-builder' ) }
 					checked={ !! p.enabled }
 					onChange={ ( enabled ) => setP( { enabled } ) }
 				/>
 				{ p.enabled && (
+					<SelectControl
+						label={ __( 'Pricing model', 'open-form-builder' ) }
+						value={ mode }
+						options={ [
+							{ value: 'sessions', label: __( 'By sessions (count-based tiers + block discounts)', 'open-form-builder' ) },
+							{ value: 'options', label: __( 'By selected options (priced choices + quantities)', 'open-form-builder' ) },
+						] }
+						onChange={ ( v ) => setP( { mode: v } ) }
+						help={ __( 'Sessions: for the session picker. Options: courses, services, add-ons, quotes.', 'open-form-builder' ) }
+					/>
+				) }
+				{ p.enabled && mode === 'options' && (
+					<>
+						<Flex>
+							<FlexItem isBlock><NumberControl label={ __( 'Base fee ($) — added to every order', 'open-form-builder' ) } value={ p.base_fee || 0 } min={ 0 } onChange={ ( v ) => setP( { base_fee: Number( v ) || 0 } ) } /></FlexItem>
+							<FlexItem isBlock />
+						</Flex>
+						<p className="ofb-help">
+							{ __( 'The total is the base fee + the price of each selected option + each number field × its unit price. Set option prices on each field in the Build tab, and number unit prices under “Number pricing”.', 'open-form-builder' ) }
+						</p>
+					</>
+				) }
+				{ p.enabled && mode === 'sessions' && (
 					<>
 						<Flex>
 							<FlexItem isBlock><NumberControl label={ __( 'Base price ($)', 'open-form-builder' ) } value={ p.base_price } min={ 0 } onChange={ ( v ) => setP( { base_price: Number( v ) || 0 } ) } /></FlexItem>

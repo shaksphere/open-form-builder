@@ -52,6 +52,54 @@ class OFB_Pricing {
 		return self::round( max( 0.0, $total ) );
 	}
 
+	/**
+	 * "Priced options" model: a flat base fee plus the price of every selected
+	 * choice option, plus each number field's value × its unit price. Used for
+	 * service/booking forms (courses, cleaning, A/C quotes) where the total is the
+	 * sum of what the visitor picked rather than a session count.
+	 *
+	 * @param array $pricing Sanitized pricing settings.
+	 * @param array $fields  name => field definition (from OFB_Schema::fields_by_name).
+	 * @param array $data    Clean, visible submission data: name => [label, value].
+	 * @return float Total price (>= 0).
+	 */
+	public static function options_total( array $pricing, array $fields, array $data ): float {
+		if ( empty( $pricing['enabled'] ) ) {
+			return 0.0;
+		}
+		$total = (float) ( $pricing['base_fee'] ?? 0 );
+
+		foreach ( $data as $name => $entry ) {
+			$field = $fields[ $name ] ?? null;
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			$value = is_array( $entry ) ? ( $entry['value'] ?? '' ) : $entry;
+			$type  = $field['type'] ?? '';
+
+			// Choice fields: add the price of each selected option.
+			if ( in_array( $type, OFB_Schema::CHOICE_TYPES, true ) ) {
+				$selected = is_array( $value ) ? array_map( 'strval', $value ) : [ (string) $value ];
+				foreach ( ( $field['options'] ?? [] ) as $opt ) {
+					if ( in_array( (string) ( $opt['value'] ?? '' ), $selected, true ) ) {
+						$total += (float) ( $opt['price'] ?? 0 );
+					}
+				}
+				continue;
+			}
+
+			// Number fields: value × unit price (e.g. rooms × $30).
+			if ( 'number' === $type ) {
+				$unit = (float) ( $field['config']['unit_price'] ?? 0 );
+				if ( $unit && is_numeric( $value ) ) {
+					$total += (float) $value * $unit;
+				}
+			}
+		}
+
+		return self::round( max( 0.0, $total ) );
+	}
+
 	/** Resolve the per-block discount as an absolute dollar amount. */
 	public static function block_discount_amount( array $pricing, float $base_price ): float {
 		$type  = ( $pricing['block_discount']['type'] ?? 'amount' ) === 'percent' ? 'percent' : 'amount';

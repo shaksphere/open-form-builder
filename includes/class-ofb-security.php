@@ -37,6 +37,7 @@ class OFB_Security {
 			'session_picker' => self::sanitize_session_picker( $in['session_picker'] ?? [] ),
 			'payments'       => self::sanitize_payments( $in['payments'] ?? [] ),
 			'emails'         => self::sanitize_emails( $in['emails'] ?? [] ),
+			'marketing'      => self::sanitize_marketing( $in['marketing'] ?? [] ),
 			'sheet_export'   => self::sanitize_sheet_export( $in['sheet_export'] ?? [] ),
 			'redirects'      => [
 				'thank_you_url' => esc_url_raw( (string) ( $in['redirects']['thank_you_url'] ?? '' ) ),
@@ -51,8 +52,11 @@ class OFB_Security {
 	private static function sanitize_pricing( $p ): array {
 		$p = is_array( $p ) ? $p : [];
 		$discount_type = ( ( $p['block_discount']['type'] ?? 'amount' ) === 'percent' ) ? 'percent' : 'amount';
+		$mode = ( ( $p['mode'] ?? 'sessions' ) === 'options' ) ? 'options' : 'sessions';
 		return [
 			'enabled'             => ! empty( $p['enabled'] ),
+			'mode'                => $mode,
+			'base_fee'            => self::money( $p['base_fee'] ?? 0 ),
 			'base_price'          => self::money( $p['base_price'] ?? 0 ),
 			'base_sessions'       => max( 0, (int) ( $p['base_sessions'] ?? 0 ) ),
 			'extra_session_price' => self::money( $p['extra_session_price'] ?? 0 ),
@@ -162,6 +166,26 @@ class OFB_Security {
 				'map'     => $map,
 				'default' => sanitize_email( (string) ( $routing['default'] ?? '' ) ),
 			],
+		];
+	}
+
+	/**
+	 * Email-marketing sync settings. Per-form: which provider, which audience/group,
+	 * and the field mapping. The provider API keys themselves are site-wide (kept in
+	 * the Stripe option) so secrets never sit inside exportable per-form JSON —
+	 * mirrors the Stripe-keys note above.
+	 */
+	private static function sanitize_marketing( $m ): array {
+		$m = is_array( $m ) ? $m : [];
+		$provider = in_array( $m['provider'] ?? '', [ 'mailchimp', 'mailerlite' ], true ) ? $m['provider'] : 'mailchimp';
+		return [
+			'enabled'     => ! empty( $m['enabled'] ),
+			'provider'    => $provider,
+			'list_id'     => sanitize_text_field( (string) ( $m['list_id'] ?? '' ) ),
+			'email_field' => OFB_Schema::clean_name( $m['email_field'] ?? '' ),
+			'name_field'  => OFB_Schema::clean_name( $m['name_field'] ?? '' ),
+			'tags'        => sanitize_text_field( (string) ( $m['tags'] ?? '' ) ),
+			'double_optin' => ! empty( $m['double_optin'] ),
 		];
 	}
 
